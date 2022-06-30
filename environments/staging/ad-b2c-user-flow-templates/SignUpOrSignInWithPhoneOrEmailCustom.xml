@@ -1,0 +1,37 @@
+<TrustFrameworkPolicy 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06" 
+PolicySchemaVersion="0.3.0.0" 
+TenantId="ucanstagingb2c.onmicrosoft.com" 
+PolicyId="B2C_1A_SignUpOrSignInWithPhoneOrEmailCustom" 
+PublicPolicyUri="http://ucanstagingb2c.onmicrosoft.com/B2C_1A_SignUpOrSignInWithPhoneOrEmailCustom" 
+TenantObjectId="c0695920-f8c6-44a0-b3de-719c24cdc996"
+DeploymentMode="Development"
+UserJourneyRecorderEndpoint="urn:journeyrecorder:applicationinsights">
+  <BasePolicy>
+    <TenantId>ucanstagingb2c.onmicrosoft.com</TenantId>
+    <PolicyId>B2C_1A_PhoneEmailCustomBase</PolicyId>
+  </BasePolicy>
+  <RelyingParty>
+    <DefaultUserJourney ReferenceId="SignUpOrSignInWithPhoneOrEmail" />
+      <UserJourneyBehaviors>
+    <JourneyInsights TelemetryEngine="ApplicationInsights" InstrumentationKey="6d67d824-ffdc-41a2-a21e-7c4b79f98106" DeveloperMode="false" ClientEnabled="false" ServerEnabled="false" TelemetryVersion="1.0.0" />
+  </UserJourneyBehaviors>
+    <TechnicalProfile Id="PolicyProfile">
+      <DisplayName>PolicyProfile</DisplayName>
+      <Protocol Name="OpenIdConnect" />
+      <OutputClaims>
+        <OutputClaim ClaimTypeReferenceId="displayName" />
+        <OutputClaim ClaimTypeReferenceId="givenName" />
+        <OutputClaim ClaimTypeReferenceId="surname" />
+        <OutputClaim ClaimTypeReferenceId="signInNames.phoneNumber" />
+        <OutputClaim ClaimTypeReferenceId="signInNames.emailAddress" />
+        <OutputClaim ClaimTypeReferenceId="objectId" PartnerClaimType="sub" />
+        <OutputClaim ClaimTypeReferenceId="identityProvider" />
+        <OutputClaim ClaimTypeReferenceId="tenantId" AlwaysUseDefaultValue="true" DefaultValue="{Policy:TenantObjectId}" />
+      </OutputClaims>
+      <SubjectNamingInfo ClaimType="sub" />
+    </TechnicalProfile>
+  </RelyingParty>
+</TrustFrameworkPolicy>

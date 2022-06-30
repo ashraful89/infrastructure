@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+set -e
+set -o pipefail
+# set -x
+
+# Note: This script creates a centralized store for Terraform state
+# In context of Azure, it means resource group > storage account > storage container
+# Refer to https://docs.microsoft.com/en-us/Azure/terraform/terraform-backend for more
+
+RESOURCE_GROUP_NAME=$1
+STORAGE_ACCOUNT_NAME=$2
+CONTAINER_NAME=$3
+LOCATION=$4
+SUBSCRIPTION_ID=$5
+
+echo
+echo "RESOURCE_GROUP_NAME = $RESOURCE_GROUP_NAME"
+echo "STORAGE_ACCOUNT_NAME = $STORAGE_ACCOUNT_NAME"
+echo "CONTAINER_NAME = $CONTAINER_NAME"
+echo "LOCATION = $LOCATION"
+echo "SUBSCRIPTION = $SUBSCRIPTION_ID"
+echo
+
+if [[ -z $RESOURCE_GROUP_NAME || -z $STORAGE_ACCOUNT_NAME || -z $CONTAINER_NAME || -z $LOCATION || -z $SUBSCRIPTION_ID ]]; then
+  echo 'One or more environment variables are undefined...'
+  exit 1
+fi
+
+# Select subscription
+echo 'Selecting subscription...'
+az account set --subscription ${SUBSCRIPTION_ID}
+
+# Create resource group
+if [ $(az group exists --name $RESOURCE_GROUP_NAME) = false ]; then
+  echo 'Creating resource group...'
+  az group create --name ${RESOURCE_GROUP_NAME} --location ${LOCATION}
+else
+  echo 'Resource group already exists, skipping creation step...'
+fi
+
+# Create storage account
+if [ "$(az storage account check-name --name $STORAGE_ACCOUNT_NAME  | jq .nameAvailable)" = true ]; then
+  echo 'Creating storage account...'
+  az storage account create --resource-group ${RESOURCE_GROUP_NAME} --name ${STORAGE_ACCOUNT_NAME} --kind StorageV2 --sku Standard_LRS --encryption-services blob
+elif [ "$(az storage account check-name --name $STORAGE_ACCOUNT_NAME | jq .reason -r)" = "AlreadyExists" ]; then
+  echo 'Storage account already exists, skipping creation step...'
+else
+  echo 'Invalid storage account name!'
+  exit 1
+fi
+
+# Get storage account key
+ACCOUNT_KEY=$(az storage account keys list --resource-group ${RESOURCE_GROUP_NAME} --account-name ${STORAGE_ACCOUNT_NAME} --query "[0].value" -o tsv)
+
+# Create storage container
+if [ "$(az storage container exists --name $CONTAINER_NAME --account-name $STORAGE_ACCOUNT_NAME --account-key $ACCOUNT_KEY | jq .exists)" = false ]; then
+  echo "Creating storage container $CONTAINER_NAME..."
+  az storage container create --name ${CONTAINER_NAME} --account-name ${STORAGE_ACCOUNT_NAME} --account-key ${ACCOUNT_KEY}
+else
+  echo 'Storage container already exists, skipping creation step...'
+fi

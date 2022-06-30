@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -e
+set -o pipefail
+# set -x
+
+SUBSCRIPTION_ID=$1
+
+if [[ -z $SUBSCRIPTION_ID ]]; then
+  echo 'One or more environment variables are undefined...'
+  exit 1
+fi
+
+# Select subscription
+echo 'Selecting subscription...'
+az account set --subscription ${SUBSCRIPTION_ID}

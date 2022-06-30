@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -e
+set -o pipefail
+# set -x
+
+RESOURCE_GROUP_NAME=$1
+
+if [[ -z $RESOURCE_GROUP_NAME ]]; then
+  echo 'One or more environment variables are undefined...'
+  exit 1
+fi
+
+echo
+echo "RESOURCE_GROUP_NAME = $RESOURCE_GROUP_NAME"
+echo
+
+az group delete --name $RESOURCE_GROUP_NAME
