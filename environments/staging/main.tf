@@ -1,5 +1,5 @@
 module "common" {
-  source                                 = "../../modules/common"
+  source                                 = "./modules/common"
   environment                            = local.environment
   subscription_id                        = local.subscription_id
   contentful_endpoint                    = local.contentful_endpoint

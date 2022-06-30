@@ -3,7 +3,7 @@ terraform {
     organization = "SCI-Dhaka"
 
     workspaces {
-      name = "Staging"
+      name = "infrastructure"
     }
   }
   required_providers {
